@@ -1,25 +1,25 @@
 const { ActivityType, Events } = require("discord.js");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v10");
+const ms = require('ms')
 
 module.exports = {
   name: Events.ClientReady,
   once: true,
   execute: async (client) => {
     const rest = new REST({ version: "10" }).setToken(client.token);
-    const activities = [`Developed by memte.`, `${client.user.username}`];
-    let nowActivity = 0;
+    const activities = [`you.`, `Nam coding.`, `Denji, Aki and Power.`, 'Chainsaw Man.'];
 
     const botPresence = () => {
       client.user.presence.set({
-        activities: [{ name: `${activities[nowActivity++ % activities.length]}`, type: ActivityType.Listening }],
+        activities: [{ name: `${activities[Math.floor(Math.random() * activities.length)]}`, type: ActivityType.Watching }],
       });
-      setTimeout(botPresence, 300000);
+      setInterval(botPresence, ms('1 minute'));
     }
 
     botPresence();
 
-    client.log(`${client.user.username} Aktif Edildi!`);
+    client.log(`${client.user.username} is ready.`);
 
     try {
       await rest.put(Routes.applicationCommands(client.user.id), {

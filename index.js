@@ -2,7 +2,10 @@ const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const client = new Client({
   intents: Object.values(GatewayIntentBits), 
   partials: Object.values(Partials),
-  shards: "auto"
+  shards: "auto",
+   allowedMentions: {
+    repliedUser: false
+   }
 });
 const config = require("./src/config.js");
 const { readdirSync } = require("node:fs");

@@ -1,21 +1,62 @@
-const { EmbedBuilder, PermissionsBitField } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const { SlashCommandBuilder } = require("@discordjs/builders");
+const ms = require("ms");
+const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 
- exports.commandBase = {
+exports.commandBase = {
   prefixData: {
-  name: "ping",
-  aliases: ["pong"]
+    name: "ping",
+    aliases: ["pong"]
   },
   slashData: new SlashCommandBuilder()
-  .setName("ping")
-  .setDescription("Pong!"),
-  // komutu geliştirmek istersen guide: https://discordjs.guide/slash-commands/advanced-creation.html
-  cooldown: 5000,//1 saniye = 1000 ms / cooldown olmasını istemezseniz 0 yazın.
-  ownerOnly: false,//komutu sadece geliştiricinin kullanabilmesini istersen true olarak değiştir
+    .setName("ping")
+    .setDescription("Returns client and websocket ping."),
+  cooldown: ms('5 seconds'),
+  ownerOnly: false,
   prefixRun: async (client, message, args) => {
-    message.reply(`Pong 🏓`)
+    const reply = await message.reply(`**M4sk** is thinking...`)
+    const ping = reply.createdTimestamp - message.createdTimestamp;
+    const clientPing = client.ws.ping;
+
+    const embed = addDefaultEmbedSettings(new EmbedBuilder(), message, client)
+    if (ping + clientPing > 300) embed.setColor('Red'); else embed.setColor('Green')
+    embed
+      .setTitle(`Pong! 🏓`)
+      .addFields({
+        name: 'Client',
+        value: `${ping}ms`,
+        inline: true
+      }, {
+        name: 'Websocket',
+        value: `${clientPing}ms`,
+        inline: true
+      })
+      reply.edit({
+      content: "_ _",
+      embeds: [embed]
+    })
   },
   slashRun: async (client, interaction) => {
-    interaction.reply(`Pong 🏓`)
+    interaction.deferReply()
+    const reply = await interaction.fetchReply();
+    const ping = reply.createdTimestamp - interaction.createdTimestamp;
+    const clientPing = client.ws.ping;
+
+    const embed = addDefaultEmbedSettings(new EmbedBuilder(), interaction, client)
+    if (ping + clientPing > 300) embed.setColor('Red'); else embed.setColor('Green')
+    embed
+      .setTitle(`Pong! 🏓`)
+      .addFields({
+        name: 'Client',
+        value: `${ping}ms`,
+        inline: true
+      }, {
+        name: 'Websocket',
+        value: `${clientPing}ms`,
+        inline: true
+      })
+    interaction.followUp({
+      embeds: [embed]
+    })
   }
 }

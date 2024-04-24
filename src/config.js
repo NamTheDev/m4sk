@@ -1,5 +1,7 @@
+const { readFileSync } = require("fs");
+
 module.exports = {
-  prefix: "!",
-  owner: "Bot Sahip ID",
-  token: "Bot Tokeni",
+  prefix: ">",
+  owner: "1202507536838828083",
+  token: readFileSync('src/token.txt', 'utf-8')
 }
