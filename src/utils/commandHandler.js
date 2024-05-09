@@ -11,10 +11,10 @@ module.exports = {
     // - Handlers -
     const commandFolders = await readdirSync("./src/commands");
 
-    await Promise.all(commandFolders.map(async (category) => {
+    commandFolders.forEach(async (category) => {
       const commandFiles = await readdirSync(`./src/commands/${category}`);
 
-      await Promise.all(commandFiles.map(async (file) => {
+      commandFiles.forEach(async (file) => {
         const commands = await import(`../commands/${category}/${file}`);
 
         if (commands) {
@@ -43,7 +43,7 @@ module.exports = {
           client.slashDatas.push(slashData);
           client.slashCommands.set(slashCommand.name, slashCommand);
         }
-      }));
-    }));
+      });
+    });
   },
 }
