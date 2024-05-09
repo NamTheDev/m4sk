@@ -28,14 +28,15 @@ exports.commandBase = {
             .setTitle('Help menu')
             .setDescription(`\`\`\`${prefix}help <page>\`\`\`Use the command above or the select menu below to display a page.\n### Available pages:`)
             .addFields(pages)
-        if (args.length === 0)
+            console.log(pages)
+        if (args.length === 0 || pages.find(({ name }) => name === args[0].toLowerCase()))
             return message.channel.send({
                 embeds: [guideEmbed]
             })
-
-        const prefix_commands = []
-        for (const command of client.commands) {
-            prefix_commands.push(command)
+        const selectedPage = args[0]
+        switch (selectedPage) {
+            case "prefix_commands":
+                
         }
         const slash_commands = []
         for (const slash_commands of client.slashCommands) { }
