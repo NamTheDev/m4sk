@@ -21,6 +21,7 @@ module.exports = {
 
     client.log(`${client.user.username} is ready.`);
 
+    console.log(client.slashDatas)
     try {
       await rest.put(Routes.applicationCommands(client.user.id), {
         body: client.slashDatas,

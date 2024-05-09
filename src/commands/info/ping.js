@@ -4,13 +4,9 @@ const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 
 exports.commandBase = {
-  prefixData: {
-    name: "ping",
-    aliases: ["pong"]
-  },
-  slashData: new SlashCommandBuilder()
-    .setName("ping")
-    .setDescription("Returns client and websocket ping."),
+  name: "ping",
+  description: "Returns client and websocket ping.",
+  aliases: ["pong"],
   cooldown: ms('5 seconds'),
   ownerOnly: false,
   prefixRun: async (client, message, args) => {
@@ -31,7 +27,7 @@ exports.commandBase = {
         value: `${clientPing}ms`,
         inline: true
       })
-      reply.edit({
+    reply.edit({
       content: "_ _",
       embeds: [embed]
     })
