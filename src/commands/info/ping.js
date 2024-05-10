@@ -1,14 +1,16 @@
 const { EmbedBuilder } = require("discord.js");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
+const SlashCommand = require("../../structures/SlashCommand");
 
-exports.commandBase = {
-  name: "ping",
-  description: "Returns client and websocket ping.",
-  aliases: ["pong"],
-  cooldown: ms('5 seconds'),
+module.exports = new SlashCommand({
+  data: {
+    name: "ping",
+    description: "Returns client and websocket ping.",
+    cooldown: ms('5 seconds'),
+  },
   ownerOnly: false,
-  prefixRun: async (client, message, args) => {
+  execute: async (client, message, args) => {
     const reply = await message.reply(`**M4sk** is thinking...`)
     const ping = reply.createdTimestamp - message.createdTimestamp;
     const clientPing = client.ws.ping;
@@ -54,4 +56,4 @@ exports.commandBase = {
       embeds: [embed]
     })
   }
-}
+})

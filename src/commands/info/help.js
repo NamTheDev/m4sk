@@ -2,59 +2,52 @@ const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMen
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 const { prefix } = require("../../config");
+const SlashCommand = require("../../structures/SlashCommand");
 
-exports.commandBase = {
-    name: "help",
-    description: "Send a help menu.",
-    cooldown: ms('10 seconds'),
-    arguments: ["page"],
-    ownerOnly: false,
-    prefixRun: async (client, message, args) => {
-        const pages = [
+module.exports = new SlashCommand({
+    data: {
+        name: "help",
+        description: "Send a help menu.",
+        cooldown: ms('10 seconds'),
+        autocomplete: true,
+        options: [
             {
-                name: 'prefix_commands',
-                value: 'Show available prefix commands'
-            },
-            {
-                name: 'slash_commands',
-                value: 'Show available slash commands'
+                name: 'command',
+                
             }
-        ].map(page => ({ ...page, inline: true }))
-        const guideEmbed = addDefaultEmbedSettings(new EmbedBuilder(), message, client)
-            .setTitle('Help menu')
-            .setDescription(`\`\`\`${prefix}help <page>\`\`\`Use the command above or the select menu below to display a page.\n### Available pages:`)
-            .addFields(pages)
-        if (args.length === 0 || !pages.find(({ name }) => name === args[0].trim().toLowerCase()))
-            return message.channel.send({
-                embeds: [guideEmbed]
-            })
-        const selectedPage = args[0]
-        switch (selectedPage) {
-            case "slash_commands":
-            case "prefix_commands":
-                const commands = selectedPage === 'prefix_commands' ? client.commands : client.slashCommands
-                let index = 0;
-                const options = commands.map(({ name }) => {
-                    index += 1
-                    return new StringSelectMenuOptionBuilder()
-                        .setLabel(name)
-                        .setValue(index.toString())
-                })
-                options.push({
-                    label: 'Original page',
-                    value: (index+1).toString()
-                })
-                const ActionRow = new ActionRowBuilder()
-                    .addComponents(
-                        new StringSelectMenuBuilder()
-                            .setPlaceholder('Select a command')
-                            .setCustomId(`HELP|SELECT|${message.channel.id}|${message.author.id}|${selectedPage === 'prefix_commands' ? 'PREFIX' : 'SLASH'}`)
-                            .setOptions(options)
-                    )
-                return await message.reply({ components: [ActionRow] })
-        }
+        ]
     },
-    slashRun: async (client, interaction) => {
-
+    ownerOnly: false,
+    autoComplete: async (interaction) => {
+        const focusedValue = interaction.options.getFocused();
+        const commandNames = client.commands.map(({ name }) => name).map(choice => ({ name: choice, value: choice }));
+        if (!focusedValue) return await interaction.respond(commandNames)
+        const filtered = commandNames.filter(choice => choice.startsWith(focusedValue));
+        await interaction.respond(
+            filtered.map(choice => ({ name: choice, value: choice })),
+        );
+    },
+    execute: async (client, interaction) => {
+        const commandName = interaction.options.getString()
+            let { name, description, aliases, arguments } = client.commands.get()
+            if (!arguments) arguments = []
+            if (!aliases) aliases = []
+                addDefaultEmbedSettings(new EmbedBuilder(), interaction, client)
+                    .setTitle(name)
+                    .setDescription(description)
+                    .setFields({
+                        name: 'Aliases',
+                        value: aliases.length > 0 ? aliases.map(aliase => `\`${aliase}\``).join(', ') : "No aliases."
+                    }, {
+                        name: 'Arguments',
+                        value: arguments.length > 0 ? arguments.map(argument => `\`${argument}\``).join(', ') : "No options."
+                    }, {
+                        name: 'Usage',
+                        value: `\`\`\`${prefix}${name}${arguments.length > 0 ? arguments.map(argument => ` <${argument}>`).join('') : ''}\`\`\``
+                    })
+                    .setFooter({
+                        text: `Use ${prefix}help to view the help menu`
+                    })
+        console.log(embeds)
     }
-}
+})
