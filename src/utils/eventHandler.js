@@ -1,27 +1,8 @@
 const { readdirSync } = require("node:fs");
 
 module.exports = {
-  execute: async (client) => {
+  execute: async () => {
     const eventFiles = readdirSync("./src/events");
-    eventFiles.forEach(async (file) => {
-      const event = await require(`../events/${file}`);
-
-      if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args));
-      } else {
-        client.on(event.name, (...args) => event.execute(...args));
-      }
-    })
-
-    // Process Listeners
-    process.on("unhandledRejection", (e) => {
-      console.log(e);
-    });
-    process.on("uncaughtException", (e) => {
-      console.log(e);
-    });
-    process.on("uncaughtExceptionMonitor", (e) => {
-      console.log(e);
-    });
+    eventFiles.forEach(async (file) => require(`../events/${file}`))
   }
 }

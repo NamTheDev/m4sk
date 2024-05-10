@@ -1,5 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 const { prefix } = require("../../config");
@@ -8,6 +7,7 @@ exports.commandBase = {
     name: "help",
     description: "Send a help menu.",
     cooldown: ms('10 seconds'),
+    arguments: ["page"],
     ownerOnly: false,
     prefixRun: async (client, message, args) => {
         const pages = [
@@ -24,23 +24,34 @@ exports.commandBase = {
             .setTitle('Help menu')
             .setDescription(`\`\`\`${prefix}help <page>\`\`\`Use the command above or the select menu below to display a page.\n### Available pages:`)
             .addFields(pages)
-        console.log(pages, args[0])
         if (args.length === 0 || !pages.find(({ name }) => name === args[0].trim().toLowerCase()))
             return message.channel.send({
                 embeds: [guideEmbed]
             })
         const selectedPage = args[0]
         switch (selectedPage) {
+            case "slash_commands":
             case "prefix_commands":
-                const prefix_commands = []
-                for (const data of client.commands) {
-                    const { prefixData } = data[1]
-                    const { name, description, aliases } = prefixData
-                    prefix_commands.push({
-                        commandName: prefixData
-                    })
-                }
-                console.log(prefix_commands)
+                const commands = selectedPage === 'prefix_commands' ? client.commands : client.slashCommands
+                let index = 0;
+                const options = commands.map(({ name }) => {
+                    index += 1
+                    return new StringSelectMenuOptionBuilder()
+                        .setLabel(name)
+                        .setValue(index.toString())
+                })
+                options.push({
+                    label: 'Original page',
+                    value: (index+1).toString()
+                })
+                const ActionRow = new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setPlaceholder('Select a command')
+                            .setCustomId(`HELP|SELECT|${message.channel.id}|${message.author.id}|${selectedPage === 'prefix_commands' ? 'PREFIX' : 'SLASH'}`)
+                            .setOptions(options)
+                    )
+                return await message.reply({ components: [ActionRow] })
         }
     },
     slashRun: async (client, interaction) => {

@@ -1,12 +1,9 @@
 const { Collection, Events, InteractionType } = require("discord.js");
 const cooldown = new Collection();
 const config = require("../config.js");
+const client = require("../../index.js");
 
-module.exports = {
-  name: Events.InteractionCreate,
-
-  execute: async (interaction) => {
-    let client = interaction.client;
+client.on('interactionCreate', async (interaction) => {
     if (interaction.type == InteractionType.ApplicationCommand) {
       if (interaction.user.bot) return;
 
@@ -46,5 +43,4 @@ module.exports = {
         console.log(e)
       }
     }
-  }
-}
+  })

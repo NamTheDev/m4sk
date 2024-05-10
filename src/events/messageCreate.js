@@ -1,10 +1,9 @@
 const { ChannelType, Collection, Events } = require("discord.js");
 const config = require("../config.js");
+const client = require("../../index.js");
 const cooldown = new Collection();
 
-module.exports = {
-  name: Events.MessageCreate,
-  execute: async (message) => {
+client.on('messageCreate', (message) => {
     let client = message.client;
 
     if (message.author.bot) return;
@@ -42,5 +41,4 @@ module.exports = {
         command.prefixRun(client, message, args);
       }
     }
-  }
-};
+  })

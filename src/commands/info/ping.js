@@ -1,5 +1,4 @@
 const { EmbedBuilder } = require("discord.js");
-const { SlashCommandBuilder } = require("@discordjs/builders");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 
