@@ -10,32 +10,8 @@ module.exports = new SlashCommand({
     cooldown: ms('5 seconds'),
   },
   ownerOnly: false,
-  execute: async (client, message, args) => {
-    const reply = await message.reply(`**M4sk** is thinking...`)
-    const ping = reply.createdTimestamp - message.createdTimestamp;
-    const clientPing = client.ws.ping;
-
-    const embed = addDefaultEmbedSettings(new EmbedBuilder(), message, client)
-    if (ping + clientPing > 300) embed.setColor('Red'); else embed.setColor('Green')
-    embed
-      .setTitle(`Pong! 🏓`)
-      .addFields({
-        name: 'Client',
-        value: `${ping}ms`,
-        inline: true
-      }, {
-        name: 'Websocket',
-        value: `${clientPing}ms`,
-        inline: true
-      })
-    reply.edit({
-      content: "_ _",
-      embeds: [embed]
-    })
-  },
-  slashRun: async (client, interaction) => {
-    interaction.deferReply()
-    const reply = await interaction.fetchReply();
+  execute: async ({ interaction, client }) => {
+    const reply = await interaction.deferReply()
     const ping = reply.createdTimestamp - interaction.createdTimestamp;
     const clientPing = client.ws.ping;
 
@@ -52,7 +28,8 @@ module.exports = new SlashCommand({
         value: `${clientPing}ms`,
         inline: true
       })
-    interaction.followUp({
+      interaction.followUp({
+      content: "_ _",
       embeds: [embed]
     })
   }

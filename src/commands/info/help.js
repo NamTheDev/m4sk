@@ -1,53 +1,88 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
+const { EmbedBuilder, SlashCommandSubcommandBuilder, ApplicationCommandOptionType } = require("discord.js");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 const { prefix } = require("../../config");
 const SlashCommand = require("../../structures/SlashCommand");
+const { rest } = require("../../..");
 
 module.exports = new SlashCommand({
     data: {
         name: "help",
-        description: "Send a help menu.",
+        description: "Details about the bot.",
         cooldown: ms('10 seconds'),
-        autocomplete: true,
         options: [
-            {
-                name: 'command',
-                
-            }
+            new SlashCommandSubcommandBuilder()
+                .setName('commands')
+                .setDescription("Details about bot's commands.")
+                .addStringOption(option =>
+                    option
+                        .setName('name')
+                        .setDescription('Search by the name of the command.')
+                        .setAutocomplete(true)
+                        .setRequired(true)
+                )
         ]
     },
     ownerOnly: false,
-    autoComplete: async (interaction) => {
+    autoComplete: async ({ interaction, client }) => {
         const focusedValue = interaction.options.getFocused();
-        const commandNames = client.commands.map(({ name }) => name).map(choice => ({ name: choice, value: choice }));
+        const commandNames = client.commands.map(({ data }) => data.name).map(choice => ({ name: choice, value: choice }));
+        commandNames.push({
+            name: 'Show all',
+            value: 'all'
+        })
         if (!focusedValue) return await interaction.respond(commandNames)
-        const filtered = commandNames.filter(choice => choice.startsWith(focusedValue));
+        const filtered = commandNames.filter(({ name, value }) => name.startsWith(focusedValue) || value === 'all');
         await interaction.respond(
-            filtered.map(choice => ({ name: choice, value: choice })),
+            filtered
         );
     },
-    execute: async (client, interaction) => {
-        const commandName = interaction.options.getString()
-            let { name, description, aliases, arguments } = client.commands.get()
-            if (!arguments) arguments = []
-            if (!aliases) aliases = []
-                addDefaultEmbedSettings(new EmbedBuilder(), interaction, client)
-                    .setTitle(name)
-                    .setDescription(description)
-                    .setFields({
-                        name: 'Aliases',
-                        value: aliases.length > 0 ? aliases.map(aliase => `\`${aliase}\``).join(', ') : "No aliases."
-                    }, {
-                        name: 'Arguments',
-                        value: arguments.length > 0 ? arguments.map(argument => `\`${argument}\``).join(', ') : "No options."
-                    }, {
-                        name: 'Usage',
-                        value: `\`\`\`${prefix}${name}${arguments.length > 0 ? arguments.map(argument => ` <${argument}>`).join('') : ''}\`\`\``
-                    })
-                    .setFooter({
-                        text: `Use ${prefix}help to view the help menu`
-                    })
-        console.log(embeds)
+    execute: async ({ interaction, client }) => {
+        await interaction.deferReply()
+        const embed = addDefaultEmbedSettings(new EmbedBuilder(), interaction, client)
+        const commandName = interaction.options.getString('name')
+        if (commandName === 'all') {
+            const commandData = await rest.get(`/applications/${client.user.id}/commands`)
+            embed
+                .setTitle('All commands')
+                .setDescription(commandData.map(({ id, name, options }) => {
+                    if (options) {
+                        const subCommands = options
+                            .filter(option => option.type === ApplicationCommandOptionType.Subcommand)
+                            .map((subCommand) => `</${name} ${subCommand.name}:${id}>`)
+                            .join('\n')
+                        return subCommands
+                    } else return `</${name}:${id}>`
+                }).join('\n'))
+        } else {
+            const { name, description, options, id } = (await rest.get(`/applications/${client.user.id}/commands`)).find(({ name }) => name === commandName)
+            const subCommands = options ? options
+                .filter(option => option.type === ApplicationCommandOptionType.Subcommand)
+                .map(({ name }) => name) : []
+            const commandOptions = options ? options
+                .filter(option => option.type !== ApplicationCommandOptionType.Subcommand)
+                .map(({ name }) => name) : []
+
+            embed
+                .setTitle(name)
+                .setDescription(description)
+                .setFields({
+                    name: 'Sub Commands',
+                    value: subCommands.length > 0 ? subCommands.map(subCommand => `\`${subCommand}\``).join(', ') : "No aliases."
+                }, {
+                    name: 'Options',
+                    value: commandOptions.length > 0 ? commandOptions.map(commandOption => `\`${commandOption}\``).join(', ') : "No options."
+                }, {
+                    name: 'Usage',
+                    value: `\`\`\`/${name} ${subCommands.length > 0 ? subCommands.join(' ') : commandOptions.length > 0 ? commandOptions.join(' ') : ''}\`\`\``
+                }, {
+                    name: 'Mention',
+                    value: `${subCommands.length > 0 ? subCommands.map(subCommandName => `</${name} ${subCommandName}:${id}>`).join('\n') : `</${name}:${id}>`}`
+                })
+                .setFooter({
+                    text: `Use /help to view the help menu`
+                })
+        }
+        return await interaction.followUp({ embeds: [embed] })
     }
 })

@@ -1,8 +1,8 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, Client } = require("discord.js");
 class SlashCommand {
     /**
      * 
-     * @param {{data: SlashCommandBuilder, autoComplete: function (import("discord.js").Interaction): void, execute: function (import("discord.js").Interaction, string[]): void}} param0 
+     * @param {{data: SlashCommandBuilder, autoComplete: function ({interaction: import("discord.js").Interaction, client: Client}): void, execute: function ({interaction: import("discord.js").Interaction, client: Client}): void}} param0 
      * @returns 
      */
     constructor({

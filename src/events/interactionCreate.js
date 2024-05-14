@@ -19,7 +19,7 @@ client.on('interactionCreate', async (interaction) => {
               ephemeral: true
             }).then(() => setTimeout(() => interaction.deleteReply(), cooldown.get(`${command.name}-${interaction.user.id}`) - Date.now() - 1000));
           }
-          command.execute(client, interaction);
+          command.execute({interaction, client});
 
           cooldown.set(`${command.name}-${interaction.user.id}`, Date.now() + command.cooldown);
 
@@ -27,7 +27,7 @@ client.on('interactionCreate', async (interaction) => {
             cooldown.delete(`${command.name}-${interaction.user.id}`);
           }, command.cooldown + 1000);
         } else {
-          command.execute(client, interaction)
+          command.execute({interaction, client})
         }
       } catch (e) {
         console.error(e)
@@ -38,7 +38,7 @@ client.on('interactionCreate', async (interaction) => {
       if (!command) return;
 
       try {
-        await command.autoComplete(client, interaction)
+        await command.autoComplete({interaction, client})
       } catch (e) {
         console.log(e)
       }
