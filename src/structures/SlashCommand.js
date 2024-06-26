@@ -11,6 +11,7 @@ class SlashCommand {
         execute,
         ownerOnly,
     }) {
+        if(!data.type) data.type = 1
         return { data, autoComplete, execute, ownerOnly }
     }
 }

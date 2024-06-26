@@ -38,7 +38,7 @@ module.exports = new SlashCommand({
         );
     },
     execute: async ({ interaction, client }) => {
-        await interaction.deferReply()
+        await interaction.deferReply({ ephemeral: true })
         const embed = addDefaultEmbedSettings(new EmbedBuilder(), interaction, client)
         const commandName = interaction.options.getString('name')
         if (commandName === 'all') {

@@ -1,7 +1,7 @@
 const { Collection, Events, InteractionType } = require("discord.js");
 const cooldown = new Collection();
 const config = require("../config.js");
-const client = require("../../index.js");
+const {client} = require("../../index.js");
 
 client.on('interactionCreate', async (interaction) => {
     if (interaction.type == InteractionType.ApplicationCommand) {

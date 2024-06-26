@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
 const client = new Client({
   intents: Object.values(GatewayIntentBits),
   partials: Object.values(Partials),
@@ -7,13 +7,24 @@ const client = new Client({
     repliedUser: false
   }
 });
-module.exports = client
 const config = require("./src/config.js");
 const { readdirSync } = require("node:fs");
+const { join } = require("path");
 
-readdirSync("./src/utils").forEach(async (file) => {
-  const util = await require(`./src/utils/${file}`);
-  util.execute(client);
-});
+const commands = new Collection()
+const commandFolders = readdirSync('src/commands')
+for (const commandFolder of commandFolders) {
+  const commandFiles = readdirSync(`src/commands/${commandFolder}`)
+  for (const commandFile of commandFiles) {
+    const command = require(join(process.cwd(), 'src', 'commands', commandFolder, commandFile))
+    const data = { command }
+    const { name } = data
+    commands.set(name, data)
+  }
+}
+console.log(commands)
+module.exports = { client, commands }
+
+readdirSync("src/events").forEach(async (file) => await require(join(process.cwd(), 'src', 'events', file)))
 
 client.login(config.token);
