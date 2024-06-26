@@ -28,7 +28,7 @@ module.exports = new SlashCommand({
         value: `${clientPing}ms`,
         inline: true
       })
-      interaction.followUp({
+    interaction.followUp({
       content: "_ _",
       embeds: [embed]
     })

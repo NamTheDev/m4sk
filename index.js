@@ -17,12 +17,12 @@ for (const commandFolder of commandFolders) {
   const commandFiles = readdirSync(`src/commands/${commandFolder}`)
   for (const commandFile of commandFiles) {
     const command = require(join(process.cwd(), 'src', 'commands', commandFolder, commandFile))
-    const data = { command }
+    const { data } = command
     const { name } = data
     commands.set(name, data)
   }
 }
-console.log(commands)
+config.rest.setToken(config.token)
 module.exports = { client, commands }
 
 readdirSync("src/events").forEach(async (file) => await require(join(process.cwd(), 'src', 'events', file)))

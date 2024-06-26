@@ -1,9 +1,8 @@
 const { EmbedBuilder, SlashCommandSubcommandBuilder, ApplicationCommandOptionType } = require("discord.js");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
-const { prefix } = require("../../config");
+const { rest } = require("../../config");
 const SlashCommand = require("../../structures/SlashCommand");
-const { rest } = require("../../..");
 
 module.exports = new SlashCommand({
     data: {

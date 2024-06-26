@@ -2,7 +2,6 @@ const { EmbedBuilder, ApplicationCommandOptionType, SlashCommandStringOption, Sl
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 const SlashCommand = require("../../structures/SlashCommand");
-const { options } = require("../../..");
 
 module.exports = new SlashCommand({
     data: {
@@ -11,13 +10,13 @@ module.exports = new SlashCommand({
         cooldown: ms('3 seconds'),
         options: [
             new SlashCommandStringOption()
-            .setName('type')
-            .setDescription('Type of avatar (display or default).')
-            .setChoices(['display', 'default'].map(name => ({name, value: name})))
-            .setRequired(true),
-             new SlashCommandUserOption()
-             .setName('user')
-             .setDescription('User to get avatar.')
+                .setName('type')
+                .setDescription('Type of avatar (display or default).')
+                .setChoices(...['display', 'default'].map(name => ({ name, value: name })))
+                .setRequired(true),
+            new SlashCommandUserOption()
+                .setName('user')
+                .setDescription('User to get avatar.')
         ]
     },
     ownerOnly: false,
