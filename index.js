@@ -1,32 +1,43 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
-const client = new Client({
-  intents: Object.values(GatewayIntentBits),
-  partials: Object.values(Partials),
-  shards: "auto",
-  allowedMentions: {
-    repliedUser: false
-  }
-});
-const config = require("./src/config.js");
-const { readdirSync } = require("node:fs");
+const { Client, GatewayIntentBits, Collection, Routes } = require("discord.js");
+const { readdirSync } = require("fs");
 const { join } = require("path");
 
+const client = new Client({
+    intents: Object.keys(GatewayIntentBits).map(intent => intent)
+})
+
 const commands = new Collection()
-const commandFolders = readdirSync('src/commands')
-for (const commandFolder of commandFolders) {
-  const commandFiles = readdirSync(`src/commands/${commandFolder}`)
-  for (const commandFile of commandFiles) {
-    const command = require(join(process.cwd(), 'src', 'commands', commandFolder, commandFile))
-    const { data } = command
-    const { name } = data
-    commands.set(name, command)
-  }
-}
-module.exports = { client, commands }
+const slashData = []
 
-const eventFiles = readdirSync("src/events")
-for (const eventFile of eventFiles) {
-  require(join(process.cwd(), 'src', 'events', eventFile))
+const commandFiles = readdirSync('commands')
+for (const commandFile of commandFiles) {
+    const command = require(join(process.cwd(), 'commands', commandFile))
+    commands.set(command.data.name, command)
+    slashData.push(command.data)
 }
 
-client.login(config.token);
+
+client.on('ready', async ({ rest }) => {
+    try {
+        console.log('Started refreshing application (/) commands.');
+
+        await rest.put(
+            Routes.applicationCommands(client.user.id),
+            { body: slashData },
+        );
+
+        console.log('Successfully registered application (/) commands.');
+    } catch (error) {
+        console.error(error);
+    }
+})
+
+client.on('interactionCreate', async (interaction) => {
+    const command = commands.get(interaction.commandName)
+    if (command) await command.execute(interaction)
+    if (command.autocomplete) try {
+        await command.autocomplete(interaction)
+    } catch (e) {
+        console.log(e)
+    }
+})
