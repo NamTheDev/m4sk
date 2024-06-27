@@ -1,4 +1,4 @@
-const { EmbedBuilder, ApplicationCommandOptionType, SlashCommandStringOption, SlashCommandUserOption } = require("discord.js");
+const { EmbedBuilder, ApplicationCommandOptionType, SlashCommandStringOption, SlashCommandUserOption, ALLOWED_SIZES } = require("discord.js");
 const ms = require("ms");
 const addDefaultEmbedSettings = require("../../utilFunctions/addDefaultEmbedSettings");
 const SlashCommand = require("../../structures/SlashCommand");
@@ -22,7 +22,11 @@ module.exports = new SlashCommand({
     ownerOnly: false,
     execute: async ({ interaction, client }) => {
         await interaction.deferReply()
-        const displayAvatar = interaction.user.displayAvatarURL()
-        const defaultAvatar = interaction.user.defaultAvatarURL()
+        const type = interaction.options.getString('type')
+        const user = interaction.options.getUser('user')
+        const displayAvatar = user ? user.displayAvatarURL({ size: ALLOWED_SIZES['8'] }) : interaction.user.displayAvatarURL({ size: ALLOWED_SIZES['8'] })
+        const defaultAvatar = user ? user.avatarURL({ size: ALLOWED_SIZES['8'] }) : interaction.user.avatarURL({ size: ALLOWED_SIZES['8'] })
+        const avatarURL = type === 'display' ? displayAvatar : defaultAvatar
+        await interaction.followUp(avatarURL)
     }
 })

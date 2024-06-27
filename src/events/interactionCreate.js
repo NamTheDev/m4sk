@@ -1,14 +1,14 @@
 const { Collection, Events, InteractionType } = require("discord.js");
 const cooldown = new Collection();
 const config = require("../config.js");
-const {client} = require("../../index.js");
+const {client, commands} = require("../../index.js");
 
 client.on('interactionCreate', async (interaction) => {
     if (interaction.type == InteractionType.ApplicationCommand) {
       if (interaction.user.bot) return;
 
       try {
-        const command = client.commands.get(interaction.commandName)
+        const command = commands.get(interaction.commandName)
         if (command.ownerOnly && interaction.user.id !== config.owner) return interaction.reply({ content: "This command is only available for the owner of the bot.", ephemeral: true });
         if (command.cooldown) {
           if (cooldown.has(`${command.name}-${interaction.user.id}`)) {
@@ -20,7 +20,6 @@ client.on('interactionCreate', async (interaction) => {
             }).then(() => setTimeout(() => interaction.deleteReply(), cooldown.get(`${command.name}-${interaction.user.id}`) - Date.now() - 1000));
           }
           command.execute({interaction, client});
-
           cooldown.set(`${command.name}-${interaction.user.id}`, Date.now() + command.cooldown);
 
           setTimeout(() => {
@@ -34,7 +33,7 @@ client.on('interactionCreate', async (interaction) => {
         interaction.reply({ content: "An error occured while running the command. Please try again, later.", ephemeral: true })
       }
     } else if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
-      const command = client.commands.get(interaction.commandName);
+      const command = commands.get(interaction.commandName);
       if (!command) return;
 
       try {
