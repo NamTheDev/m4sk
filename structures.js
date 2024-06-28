@@ -1,12 +1,31 @@
 const { SlashCommandBuilder, CommandInteraction } = require("discord.js");
 
-module.exports = class SlashCommand {
+/**
+ * Class representing a slash command.
+ */
+class SlashCommand {
     /**
-     * 
-     * @param {SlashCommandBuilder} data 
-     * @param {function(CommandInteraction): void} execute 
+     * @param {{data: SlashCommandBuilder, execute: function(CommandInteraction): void, autocomplete?: function(CommandInteraction): void }} options - The command options.
      */
-    constructor (data, execute) {
+    constructor({ data, execute, autocomplete }) {
+        /**
+         * The command data.
+         * @type {SlashCommandBuilder}
+         */
+        this.data = data;
 
+        /**
+         * The execute function.
+         * @type {function(CommandInteraction): void}
+         */
+        this.execute = execute;
+
+        /**
+         * The autocomplete function.
+         * @type {function(CommandInteraction): void | undefined}
+         */
+        this.autocomplete = autocomplete;
     }
 }
+
+module.exports = { SlashCommand };
