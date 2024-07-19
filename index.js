@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits, Collection, Routes } = require("discord.js");
-const { readdirSync } = require("fs");
+const { readdirSync, readFileSync } = require("fs");
 const { join } = require("path");
 
 const client = new Client({
@@ -41,3 +41,7 @@ client.on('interactionCreate', async (interaction) => {
         console.log(e)
     }
 })
+
+const token = readFileSync('token.txt', 'utf-8')
+
+client.login(token)
