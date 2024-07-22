@@ -20,7 +20,7 @@ for (const commandFile of commandFiles) {
 }
 
 async function consoleLog(message) {
-    await fetch(`https://mask-xpuq.onrender.com/api/consoleLog?key=${process.env.SECRET_KEY}&message=${message}&author=m4sk`)
+    await fetch(`https://mask-xpuq.onrender.com/api/consoleLog?key=${process.env.SECRET_KEY}&message=${message}&author=m4sk [${new Date()}]`)
     console.log(message)
 
 }
