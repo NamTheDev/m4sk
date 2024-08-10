@@ -18,6 +18,7 @@ module.exports = new SlashCommand({
             embeds: [
                 new EmbedBuilder()
                     .setTitle(userToGetAvatar.username)
+                    .setURL(`https://discord.com/users/${interaction.user.id}`)
                     .setImage(displayAvatarURL)
                     .setColor(defaultEmbedColor)
             ]

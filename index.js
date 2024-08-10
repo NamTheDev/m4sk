@@ -18,6 +18,8 @@ for (const commandFile of commandFiles) {
     commands.set(command.data.name, command)
     slashData.push(command.data)
 }
+client.commands = commands
+module.exports = client
 
 async function consoleLog(message) {
     await fetch(`https://mask-xpuq.onrender.com/api/consoleLog?key=${process.env.SECRET_KEY}&message=${message}&author=m4sk [${new Date()}]`)
