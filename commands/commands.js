@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder } = require("discord.js");
 const { SlashCommand } = require("../structures");
 const { defaultEmbedColor } = require("../config");
 const { readdirSync } = require("fs");
@@ -10,7 +10,7 @@ module.exports = new SlashCommand({
     execute(interaction) {
         const embedFields = [];
         const commandsData = readdirSync('commands').map(command => require(`./${command}`).data);
-        
+
         commandsData.forEach(command => {
             embedFields.push({
                 name: command.name,
@@ -34,16 +34,19 @@ module.exports = new SlashCommand({
         // Create the select menu
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('select-command')
-            .setPlaceholder('Choose a command')
+            .setPlaceholder('Select a command...')
             .addOptions(selectMenuOptions);
 
-        // Create an action row and add the select menu to it
-        const actionRow = new ActionRowBuilder().addComponents(selectMenu);
+        // Create a button to navigate back to homepage
+        const homeButton = new ButtonBuilder()
+            .setStyle('Primary')
+            .setEmoji('🏠')
+            .setCustomId('back-to-homepage')
 
         // Reply with the embed and the select menu
         interaction.reply({
             embeds: [embed],
-            components: [actionRow]
+            components: [new ActionRowBuilder().addComponents(selectMenu), new ActionRowBuilder().addComponents(homeButton)]
         });
     }
 });

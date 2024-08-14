@@ -1,9 +1,10 @@
 require('dotenv').config()
 
-const { Client, GatewayIntentBits, Collection, Routes, InteractionType } = require("discord.js");
+const { Client, GatewayIntentBits, Collection, Routes, InteractionType, EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const { readdirSync } = require("fs");
 const fetch = require("node-fetch");
 const { join } = require("path");
+const { defaultEmbedColor } = require('./config');
 
 const client = new Client({
     intents: Object.keys(GatewayIntentBits).map(intent => intent)
@@ -51,6 +52,27 @@ client.on('interactionCreate', async (interaction) => {
         if (command) await command.autocomplete(interaction)
     } catch (e) {
         consoleLog(e)
+    } else if (interaction.type === InteractionType.MessageComponent) {
+        if (interaction.customId === 'select-command') {
+            const command = commands.get(interaction.values[0])
+            const { message } = interaction
+            message.edit({
+                embeds: [
+                    new EmbedBuilder()
+                        //title: has command name and index to display the command position. ex: 1/5
+                        .setTitle(`${command.data.name}`)
+                        .setDescription(`${command.data.description}\n\n**Options:**\`\`\`${command.data.options.map(({ name, type, options }) => {
+                            let subcommandOptionsString = '';
+                            if (!type) {
+                                subcommandOptionsString = ` --> ${options.map(({ name, type }) => `${name} (${ApplicationCommandOptionType[type]})`)}`
+                            }
+                            return `${name} (${ApplicationCommandOptionType[type] || 'Subcommand'})${subcommandOptionsString}`
+                        }).join('\n') || 'no options.'}\`\`\``)
+                        .setColor(defaultEmbedColor)
+                ]
+            })
+            await interaction.deferUpdate()
+        }
     }
 })
 
