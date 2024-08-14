@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder } = require("discord.js");
 const urbanDictionary = require('@dmzoneill/urban-dictionary');
 const { SlashCommand } = require("../structures");
 const { defaultEmbedColor } = require("../config");
@@ -8,12 +8,10 @@ const fetch = require("node-fetch");
 async function fetchYoutubeSearchVideos(text) {
     const response = await fetch(`https://www.youtube.com/results?search_query=${text}`);
     const html = await response.text();
-    //convert to array data
     const videos = html.split('{"videoRenderer":{"videoId":"').slice(1).map(video => {
         const videoId = video.split('"')[0];
-        const title = video.split('"title":{"runs":[{"text":"')[1].split('"}')[0];
-        const thumbnail = video.split('"thumbnails":[{"url":"')[1].split('"')[0];
-        return { videoId, title, thumbnail };
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        return url
     });
     return videos;
 }
@@ -70,79 +68,71 @@ module.exports = new SlashCommand({
         const query = interaction.options.getString('query');
         const type = interaction.options.getString('type');
         let JSONdataArray = []
-        let embed = new EmbedBuilder()
-            .setTitle(`Search results for "${query}" on ${type}`)
-            .setColor(defaultEmbedColor);
-        const embedFields = []
+        const embeds = []
+        const messages = []
         switch (type) {
             case 'youtube':
-                fetchYoutubeSearchVideos(query).then(videos => {
-                    videos.forEach(video => {
-                        embedFields.push({
-                            name: video.title,
-                            value: `[Watch on YouTube](https://www.youtube.com/watch?v=${video.videoId})`,
-                            inline: true
-                        });
-                    });
-                    embed.addFields(embedFields);
-                    interaction.reply({
-                        embeds: [embed],
-                        ephemeral: true
-                    });
-                });
+                JSONdataArray = await fetchYoutubeSearchVideos(query);
+                JSONdataArray.forEach((url) => {
+                    messages.push(url)
+                })
                 break;
             case 'wikipedia':
-                fetchWikipediaSearch(query).then(results => {
-                    results.forEach(result => {
-                        embedFields.push({
-                            name: result.title,
-                            value: `[Read on Wikipedia](${result.link})`,
-                            inline: true
-                        });
-                    });
-                    embed.addFields(embedFields);
-                    interaction.reply({
-                        embeds: [embed],
-                        ephemeral: true
-                    });
-                });
+                JSONdataArray = await fetchWikipediaSearch(query);
+                JSONdataArray.forEach(({ title, link }) => {
+                    embeds.push(new EmbedBuilder()
+                        .setTitle(title)
+                        .setURL(link)
+                        .setColor(defaultEmbedColor)
+                    )
+                })
                 break;
-            case 'github':
-                fetchGitHubSearch(query).then(results => {
-                    results.forEach(result => {
-                        embedFields.push({
-                            name: result.title,
-                            value: `[View on GitHub](${result.url})`,
-                            inline: true
-                        });
-                    });
-                    embed.addFields(embedFields);
-                    interaction.reply({
-                        embeds: [embed],
-                        ephemeral: true
-                    });
-                });
+            case 'github': {
+                JSONdataArray = await fetchGitHubSearch(query);
+                JSONdataArray.forEach(({ title, description, url, language, followers, color }) => {
+                    embeds.push(new EmbedBuilder()
+                        .setTitle(title)
+                        .setURL(url)
+                        .setDescription(description)
+                        .addField('Language', language, true)
+                        .addField('Followers', followers, true) // TODO: add a link to followers
+                        .setColor(color)
+                    )
+                })
                 break;
+            }
             case 'urban':
-                fetchUrbanDictionarySearch(query).then(results => {
-                    results.forEach(result => {
-                        embedFields.push({
-                            name: result.word,
-                            value: result.definition, // The definition of the word
-                            inline: true
-                        });
-                    });
-                    embed.addFields(embedFields);
-                    interaction.reply({
-                        embeds: [embed],
-                        ephemeral: true
-                    });
-                });
+                JSONdataArray = await fetchUrbanDictionarySearch(query);
+                JSONdataArray.forEach(({ word, definition, example, permalink, thumbs_up, thumbs_down }) => {
+                    embeds.push(new EmbedBuilder()
+                        .setTitle(word)
+                        .setURL(permalink)
+                        .setDescription(definition)
+                        .addField('Example', example, true)
+                        .addField('Thumbs Up', thumbs_up, true)
+                        .addField('Thumbs Down', thumbs_down, true)
+                        .setColor(defaultEmbedColor)
+                    )
+                })
                 break;
         }
-        await interaction.reply( {
-            embeds: [embed],
-            ephemeral: true
-        });
+        // Button to switch page
+        const actionRow = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('previous-page')
+                    .setEmoji('⬅️')
+                    .setStyle('Primary'),
+                new ButtonBuilder()
+                    .setCustomId('next-page')
+                    .setEmoji('➡️')
+                    .setStyle('Primary')
+            )
+            const options = {
+                components: [actionRow],
+                ephemeral: true
+            }
+            embeds.length > 0 ? options.embeds = [embeds[0]] : options.content = messages[0]
+        interaction.reply(options);
     }
 });

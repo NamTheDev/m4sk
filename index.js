@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { Client, GatewayIntentBits, Collection, Routes } = require("discord.js");
+const { Client, GatewayIntentBits, Collection, Routes, InteractionType } = require("discord.js");
 const { readdirSync } = require("fs");
 const fetch = require("node-fetch");
 const { join } = require("path");
@@ -43,10 +43,12 @@ client.on('ready', async ({ rest }) => {
 })
 
 client.on('interactionCreate', async (interaction) => {
-    const command = commands.get(interaction.commandName)
-    if (command) await command.execute(interaction)
-    if (command.autocomplete) try {
-        await command.autocomplete(interaction)
+    if (interaction.type === InteractionType.ApplicationCommand) {
+        const command = commands.get(interaction.commandName)
+        if (command) await command.execute(interaction)
+    } else if (interaction.type === InteractionType.ApplicationCommandAutocomplete) try {
+        const command = commands.get(interaction.commandName)
+        if (command) await command.autocomplete(interaction)
     } catch (e) {
         consoleLog(e)
     }
