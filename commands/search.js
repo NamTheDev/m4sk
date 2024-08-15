@@ -97,7 +97,7 @@ module.exports = new SlashCommand({
                         .setEmoji('▶️')
                         .setStyle('Primary')
                 )
-            await interaction.reply({embeds: [embed], components: [new ActionRowBuilder().addComponents(actionRow)]})
+            await interaction.reply({embeds: [embed], components: [actionRow]})
         } else if (subcommand === 'github') {
             const results = await fetchGitHubSearch(text);
             const embedFields = results.map(({ title, description, url, language, followers }) => ({
