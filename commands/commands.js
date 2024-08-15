@@ -30,6 +30,11 @@ module.exports = new SlashCommand({
             description: command.description,
             value: command.name
         }));
+        selectMenuOptions.push({
+            label: 'All Commands',
+            description: 'View all available commands.',
+            value: 'all'
+        });
 
         // Create the select menu
         const selectMenu = new StringSelectMenuBuilder()
@@ -37,16 +42,10 @@ module.exports = new SlashCommand({
             .setPlaceholder('Select a command...')
             .addOptions(selectMenuOptions);
 
-        // Create a button to navigate back to homepage
-        const homeButton = new ButtonBuilder()
-            .setStyle('Primary')
-            .setEmoji('🏠')
-            .setCustomId('back-to-homepage')
-
         // Reply with the embed and the select menu
         interaction.reply({
             embeds: [embed],
-            components: [new ActionRowBuilder().addComponents(selectMenu), new ActionRowBuilder().addComponents(homeButton)]
+            components: [new ActionRowBuilder().addComponents(selectMenu)]
         });
     }
 });

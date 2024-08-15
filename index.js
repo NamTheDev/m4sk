@@ -55,8 +55,24 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.type === InteractionType.MessageComponent) {
         if (interaction.customId === 'select-command') {
             const command = commands.get(interaction.values[0])
-            const { message } = interaction
-            message.edit({
+            if (!command && interaction.values[0] === 'all') {
+                const embedFields = [];
+                commands.forEach(command => {
+                    embedFields.push({
+                        name: command.data.name,
+                        value: `${command.data.description}`,
+                        inline: true
+                    });
+                });
+                const embed = new EmbedBuilder()
+                    .setTitle('Available Commands')
+                    .setColor(defaultEmbedColor)
+                    .addFields(embedFields);
+                return await interaction.update({
+                    embeds: [embed]
+                });
+            }
+            await interaction.update({
                 embeds: [
                     new EmbedBuilder()
                         //title: has command name and index to display the command position. ex: 1/5
@@ -71,7 +87,6 @@ client.on('interactionCreate', async (interaction) => {
                         .setColor(defaultEmbedColor)
                 ]
             })
-            await interaction.deferUpdate()
         }
     }
 })
