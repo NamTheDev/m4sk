@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const urbanDictionary = require('@dmzoneill/urban-dictionary');
 async function fetchYoutubeSearchVideos(text) {
     const response = await fetch(`https://www.youtube.com/results?search_query=${text}`);
     const html = await response.text();
@@ -45,10 +46,4 @@ async function fetchUrbanDictionarySearch(text) {
     return results;
 }
 
-async function fetchGoogleImageSearch(text) {
-    const response = await fetch(`https://serpapi.com/search.json?q=${text}&engine=google_images&ijn=0`);
-    const data = await response.json()
-    return data['images_results'].map(({ original, title, link, source }) => ({ imageURL: original, title: `${title} (source: ${source})`, link, source }));
-}
-
-module.exports = { fetchYoutubeSearchVideos, fetchGitHubSearch, fetchWikipediaSearch, fetchUrbanDictionarySearch, fetchGoogleImageSearch };
+module.exports = { fetchYoutubeSearchVideos, fetchGitHubSearch, fetchWikipediaSearch, fetchUrbanDictionarySearch };

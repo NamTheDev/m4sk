@@ -5,6 +5,7 @@ const { readdirSync } = require("fs");
 const fetch = require("node-fetch");
 const { join } = require("path");
 const { defaultEmbedColor } = require('./config');
+const { fetchGoogleImageSearch } = require('./utilities/fetchDataFunctions');
 
 const client = new Client({
     intents: Object.keys(GatewayIntentBits).map(intent => intent)
@@ -42,8 +43,7 @@ client.on('ready', async ({ rest }) => {
         console.error(error);
     }
 })
-
-client.on('interactionCreate', async (interaction) => {
+const interactionEvent = async (interaction) => {
     if (interaction.type === InteractionType.ApplicationCommand) {
         const command = commands.get(interaction.commandName)
         if (command) await command.execute(interaction)
@@ -87,8 +87,31 @@ client.on('interactionCreate', async (interaction) => {
                         .setColor(defaultEmbedColor)
                 ]
             })
+        } else if (interaction.customId === `previous-google-image-result` || interaction.customId === `next-google-image-result`) {
+            const [previousButton, nextButton] = interaction.message.components[0].components
+            const oldEmbed = interaction.message.embeds[0]
+            const page = Number(oldEmbed.footer.text.split('/')[0].split('Page')[1].trim())
+            const searchText = oldEmbed.footer.text.split('-')[1].trim()
+            const images = await fetchGoogleImageSearch(searchText);
+            const pageNumber = interaction.customId.includes('next') ? page + 1 : page - 1
+            const image = images[pageNumber - 1]
+            const { title, link, imageURL } = image
+            const embed = new EmbedBuilder()
+                .setTitle(title)
+                .setURL(link)
+                .setImage(imageURL)
+                .setFooter({ text: `Page ${pageNumber} / ${images.length} - ${searchText}` }) // 1 / 10
+                .setColor(defaultEmbedColor)
+            previousButton.data.disabled = pageNumber === 1
+            nextButton.data.disabled = pageNumber === images.length
+            await interaction.update({ embeds: [embed], components: interaction.message.components })
         }
     }
-})
+}
+client.on('interactionCreate', async (interaction) =>
+    await interactionEvent(interaction)
+        .catch(async error => await interaction.followUp({content: `Oops, there's some trouble with the interactions. Please try again. ${error}`, ephemeral: true})
+        )
+)
 
 client.login(process.env.TOKEN)
