@@ -52,7 +52,7 @@ module.exports = new SlashCommand({
                 )
         ),
     async execute(interaction) {
-        const message = await interaction.deferReply()
+        await interaction.deferReply()
         let subcommand = interaction.options.getSubcommand()
         const text = interaction.options.getString('text');
         if (subcommand === 'youtube') {
