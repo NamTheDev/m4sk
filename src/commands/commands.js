@@ -9,7 +9,7 @@ module.exports = new SlashCommand({
         .setDescription('List of available commands.'),
     execute(interaction) {
         const embedFields = [];
-        const commandsData = readdirSync('commands').map(command => require(`./${command}`).data);
+        const commandsData = readdirSync('src/commands').map(command => require(`./${command}`).data);
 
         commandsData.forEach(command => {
             embedFields.push({

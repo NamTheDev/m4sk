@@ -3,8 +3,7 @@ const urbanDictionary = require('@dmzoneill/urban-dictionary');
 const { SlashCommand } = require("../structures");
 const { defaultEmbedColor } = require("../config");
 
-const { fetchYoutubeSearchVideos, fetchGitHubSearch, fetchWikipediaSearch, fetchGoogleImageSearch } = require('../utilities/fetchDataFunctions');
-
+const { fetchYoutubeSearchVideos, fetchGitHubSearch, fetchWikipediaSearch, fetchUrbanDictionarySearch } = require('../utilities/fetchDataFunctions');
 module.exports = new SlashCommand({
     data: new SlashCommandBuilder()
         .setName('search')
@@ -57,6 +56,7 @@ module.exports = new SlashCommand({
         const text = interaction.options.getString('text');
         if (subcommand === 'youtube') {
             const videos = await fetchYoutubeSearchVideos(text);
+            videos.length = 20
             const description = videos.map(({ videoTitle, url }) => `[${videoTitle}](${url})`).join('\n');
             const embed = new EmbedBuilder()
                 .setTitle(`Search results for "${text}" on YouTube`)
@@ -67,9 +67,10 @@ module.exports = new SlashCommand({
             });
         } else if (subcommand === 'github') {
             const results = await fetchGitHubSearch(text);
-            const embedFields = results.map(({ title, description, url, language, followers }) => ({
+            const embedFields = results.map(({ title, description, url, language, followers, updated_date }) => ({
                 name: title,
-                value: `${description}\n- **Language**: ${language}\n- **Followers**: ${followers}\n[Redirect to repository](${url})`
+                value: `${description}\n- **Language**: ${language}\n- **Followers**: ${followers}\n[Redirect to repository](${url})\n(Updated ${updated_date})`,
+                inline: true
             }));
             const embed = new EmbedBuilder()
                 .setTitle(`Search results for "${text}" on GitHub`)

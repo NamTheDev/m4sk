@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const urbanDictionary = require('@dmzoneill/urban-dictionary');
+const { htmlToMarkdown } = require("./stringFunctions");
 async function fetchYoutubeSearchVideos(text) {
     const response = await fetch(`https://www.youtube.com/results?search_query=${text}`);
     const html = await response.text();
@@ -15,16 +16,16 @@ async function fetchYoutubeSearchVideos(text) {
 async function fetchGitHubSearch(text) {
     const response = await fetch(`https://github.com/search?q=${text}`);
     const data = await response.json();
-    const results = data.payload.results.map(({ hl_name, hl_trunc_description, language, followers }) => {
-        const repositoryTitle = hl_name.replace(/<em>|<\/em>/g, "")
-        const title = repositoryTitle.replace('/', ' (author) / ');
-        const repositoryDescription = hl_trunc_description
-        const linkToRepository = repositoryTitle
-        const description = decodeURI(repositoryDescription ? repositoryDescription.replace(/<em>|<\/em>/g, "") : 'no description.')
+    const results = data.payload.results.map(({ archived, hl_name, hl_trunc_description, language, followers, repo: { repository: { updated_at } } }) => {
+        const repositoryTitle = htmlToMarkdown(hl_name)
+        const title = `${repositoryTitle}${archived ? '[ARCHIVED]' : ''}`.replace('/', ' (author) / ');
+        const repositoryDescription = htmlToMarkdown(hl_trunc_description)
+        const linkToRepository = repositoryTitle.replace(/[^a-zA-Z/-]/g, '');
+        const description = decodeURI(repositoryDescription ? repositoryDescription : 'no description.')
         const url = `https://github.com/${linkToRepository}`;
         language = language ? language : 'no language.';
         followers = followers ? followers : 'no followers.';
-        return { title, description, url, language, followers };
+        return { title, description, url, language, followers, updated_date: `<t:${Math.floor(new Date(updated_at).getTime() / 1000)}:R>` };
     });
     return results
 }

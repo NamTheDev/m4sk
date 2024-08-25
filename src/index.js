@@ -1,11 +1,12 @@
 require('dotenv').config()
+require('../web/index')
 
 const { Client, GatewayIntentBits, Collection, Routes, InteractionType, EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const { readdirSync } = require("fs");
 const fetch = require("node-fetch");
 const { join } = require("path");
 const { defaultEmbedColor } = require('./config');
-const { fetchGoogleImageSearch } = require('./utilities/fetchDataFunctions');
+const { fetchUrbanDictionarySearch } = require('./utilities/fetchDataFunctions');
 
 const client = new Client({
     intents: Object.keys(GatewayIntentBits).map(intent => intent)
@@ -14,9 +15,9 @@ const client = new Client({
 const commands = new Collection()
 const slashData = []
 
-const commandFiles = readdirSync('commands')
+const commandFiles = readdirSync('src/commands')
 for (const commandFile of commandFiles) {
-    const command = require(join(process.cwd(), 'commands', commandFile))
+    const command = require(join(process.cwd(), 'src/commands', commandFile))
     commands.set(command.data.name, command)
     slashData.push(command.data)
 }
@@ -43,7 +44,10 @@ client.on('ready', async ({ rest }) => {
         console.error(error);
     }
 })
-const interactionEvent = async (interaction) => {
+
+const cooldown = new Map()
+
+client.on('interactionCreate', async (interaction) => {
     if (interaction.type === InteractionType.ApplicationCommand) {
         const command = commands.get(interaction.commandName)
         if (command) await command.execute(interaction)
@@ -87,31 +91,27 @@ const interactionEvent = async (interaction) => {
                         .setColor(defaultEmbedColor)
                 ]
             })
-        } else if (interaction.customId === `previous-google-image-result` || interaction.customId === `next-google-image-result`) {
+        } else if (interaction.customId === "previous-urban-dictionary-result" || interaction.customId === "next-urban-dictionary-result") {
             const [previousButton, nextButton] = interaction.message.components[0].components
             const oldEmbed = interaction.message.embeds[0]
             const page = Number(oldEmbed.footer.text.split('/')[0].split('Page')[1].trim())
             const searchText = oldEmbed.footer.text.split('-')[1].trim()
-            const images = await fetchGoogleImageSearch(searchText);
+            const results = await fetchUrbanDictionarySearch(searchText);
             const pageNumber = interaction.customId.includes('next') ? page + 1 : page - 1
-            const image = images[pageNumber - 1]
-            const { title, link, imageURL } = image
+            const result = results[pageNumber - 1]
+            const { word, definition, example, author, thumbs_up, thumbs_down, written_on, permalink } = result
             const embed = new EmbedBuilder()
-                .setTitle(title)
-                .setURL(link)
-                .setImage(imageURL)
-                .setFooter({ text: `Page ${pageNumber} / ${images.length} - ${searchText}` }) // 1 / 10
+                .setTitle(`Search results for "${searchText}" on Urban Dictionary`)
+                .setURL(permalink)
+                .setDescription(`# ${word} (${author})\n- **Definition:**\n\`\`\`${definition}\`\`\`\n- **Example:**\n\`\`\`${example}\`\`\`\n### ${thumbs_up} 👍 ${thumbs_down} 👎`)
                 .setColor(defaultEmbedColor)
+                .setFooter({ text: `Page ${pageNumber} / ${results.length} - ${searchText}` })
+                .setTimestamp(new Date(written_on))
             previousButton.data.disabled = pageNumber === 1
-            nextButton.data.disabled = pageNumber === images.length
+            nextButton.data.disabled = pageNumber === results.length
             await interaction.update({ embeds: [embed], components: interaction.message.components })
         }
     }
-}
-client.on('interactionCreate', async (interaction) =>
-    await interactionEvent(interaction)
-        .catch(async error => await interaction.followUp({content: `Oops, there's some trouble with the interactions. Please try again. ${error}`, ephemeral: true})
-        )
-)
+})
 
 client.login(process.env.TOKEN)
