@@ -20,7 +20,7 @@
     <div style="height: 100vh; width: 100vw; margin: 0; padding: 0;" class="align-content-center">
         <div id="loginBody" class="d-flex m-auto flex-column row-gap-5 bg-black bg-opacity-25 p-3 py-5 rounded-5"
             style="width: 60vw; max-width: 25rem;">
-            <h1 class="Display-1 text-center">Sign up</h1>
+            <h1 class="Display-1 text-center">Login / register</h1>
             <div id="inputs" class="d-flex flex-column row-gap-3 z-0">
                 <!-- full name input -->
                 <div class="d-flex flex-column justify-content-center row-gap-2">
@@ -42,7 +42,7 @@
                         <input type="password" id="password"
                             class="form-control border-0 rounded-end-0 shadow-none bg-transparent"
                             placeholder="Password" aria-describedby="inputIcon">
-                        <button class="btn btn-default border-0" onclick="togglePasswordVisiblity(this)">
+                        <button class="btn btn-default border-0" onclick="togglePasswordVisibility(this)">
                             <i class="fa fa-eye"></i>
                         </button>
                         <div class="invalid-feedback bg-danger text-light text-center py-1 rounded-bottom">
@@ -58,7 +58,7 @@
                         <input type="password" id="retryPassword"
                             class="form-control border-0 rounded-end-0 shadow-none bg-transparent"
                             placeholder="Re-enter Password" aria-describedby="inputIcon">
-                        <button class="btn btn-default border-0" onclick="togglePasswordVisiblity(this)">
+                        <button class="btn btn-default border-0" onclick="togglePasswordVisibility(this)">
                             <i class="fa fa-eye"></i>
                         </button>
                         <div class="invalid-feedback bg-danger text-light text-center py-1 rounded-bottom">
@@ -78,64 +78,109 @@
     crossorigin="anonymous"></script>
 
 <script>
-    function togglePasswordVisiblity(button) {
-        const icon = button.getElementsByTagName('i')[0];
-        const passwordInput = button.parentElement.querySelector('input');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
+    // Function to toggle password visibility
+    function togglePasswordVisibility(button) {
+        const icon = button.querySelector('i'); // Select the first <i> element inside the button
+        const passwordInput = button.parentElement.querySelector('input'); // Find the input element within the same parent
+        const isPassword = passwordInput.type === 'password'; // Check if the input type is currently 'password'
+
+        // Toggle the input type between 'password' and 'text'
+        passwordInput.type = isPassword ? 'text' : 'password';
+
+        // Toggle the icon between 'fa-eye' and 'fa-eye-slash'
+        icon.classList.toggle('fa-eye', !isPassword);
+        icon.classList.toggle('fa-eye-slash', isPassword);
     }
+
     const User = {
+        // Initialize input elements
         userID_InputElement: document.getElementById('userID'),
         password_InputElement: document.getElementById('password'),
         retryPassword_InputElement: document.getElementById('retryPassword'),
         loginButton: document.getElementById('loginButton'),
         inputsContainer: document.getElementById('inputs'),
 
+        // Getters for input values
+        get userID() {
+            return this.userID_InputElement.value;
+        },
+
+        get password() {
+            return this.password_InputElement.value;
+        },
+
+        get retryPassword() {
+            return this.retryPassword_InputElement.value;
+        },
+
+        // Validate the user ID by sending an API request
         async validateUserID() {
-            const value = this.userID_InputElement.value;
+            if (!this.userID || this.userID.length < 17) return false;
             const url = `./api/validate?userID=`;
-            return (await (await fetch(/^\d+$/.test(value) ? url + value : url + '@me')).json()).response;
+            // Check if userID is a number; if not, send '@me' to the API
+            const response = await fetch(/^\d+$/.test(this.userID) ? url + this.userID : url + '@me');
+            return (await response.json()).response;
         },
 
+        // Validate password length (should be more than 8 characters)
         validatePassword() {
-            return this.password_InputElement.value.length > 8;
+            return this.password.length > 8;
         },
 
+        // Validate that retry password matches the original password
         validateRetryPassword() {
-            return this.retryPassword_InputElement.value === this.password_InputElement.value;
+            return this.retryPassword === this.password;
         },
 
+        // Validate all inputs and handle form submission
         async validateInput() {
+            // Remove 'is-invalid' class when users start typing in any input field
             for (const inputContainer of this.inputsContainer.children) {
                 const input = inputContainer.querySelector('input');
                 input.addEventListener('input', () => input.classList.remove('is-invalid'));
             }
 
-            // Validate each field and mark invalid ones
+            // Validate each field and mark invalid ones if they don't pass validation
             if (!await this.validateUserID()) return this.markInvalid(this.userID_InputElement.id);
             if (!this.validatePassword()) return this.markInvalid(this.password_InputElement.id);
             if (!this.validateRetryPassword()) return this.markInvalid(this.retryPassword_InputElement.id);
 
+            // Disable form interaction and indicate loading state
             this.inputsContainer.style.filter = 'brightness(75%)';
             this.inputsContainer.style.pointerEvents = 'none';
 
             this.loginButton.toggleAttribute('disabled');
             this.loginButton.innerHTML = '<i class="spinner-border" role="status"></i>';
+            this.login().then(alert)
         },
 
+        // Mark a specific input field as invalid
         markInvalid(id) {
             document.getElementById(id).classList.add('is-invalid');
+        },
+
+        // Post user login data to database
+        async login() {
+            const url = `./api/login`;
+            const body = JSON.stringify({
+                userID: this.userID,
+                password: this.password
+            });
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
+
+            return (await response.json()).response; // Assuming the API returns a JSON response
         }
     };
 
-    document.getElementById('loginButton').onclick = () => User.validateInput();
+    // Attach the validateInput method to the login button's click event
+    User.loginButton.onclick = () => User.validateInput();
 </script>
 
 </html>

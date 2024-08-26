@@ -4,6 +4,8 @@ const { readdirSync, readFileSync } = require('fs')
 const path = require('path')
 const app = express()
 const PORT = 3000
+const getPath = (filePath) => path.join(process.cwd(), 'web', 'api', filePath)
+
 
 readdirSync('web/pages')
     .forEach(
@@ -19,9 +21,10 @@ readdirSync('web/pages')
 readdirSync('web/api')
     .forEach(
         filePath => {
-            app.get(`/api/${filePath.split('.')[0]}`,
+            const { type, execute } = require(getPath(filePath))
+            app[type](`/api/${filePath.split('.')[0]}`,
                 async (req, res) =>
-                    await require(path.join(process.cwd(), 'web', 'api', filePath))(req, res)
+                    await execute(req, res)
             )
         }
     )
