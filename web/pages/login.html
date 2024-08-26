@@ -20,14 +20,14 @@
     <div style="height: 100vh; width: 100vw; margin: 0; padding: 0;" class="align-content-center">
         <div id="loginBody" class="d-flex m-auto flex-column row-gap-5 bg-black bg-opacity-25 p-3 py-5 rounded-5"
             style="width: 60vw; max-width: 25rem;">
-            <h1 class="Display-1 text-center">Login</h1>
+            <h1 class="Display-1 text-center">Sign up</h1>
             <div id="inputs" class="d-flex flex-column row-gap-3 z-0">
                 <!-- full name input -->
                 <div class="d-flex flex-column justify-content-center row-gap-2">
                     <div class="input-group has-validation border rounded border-0 bg-secondary bg-opacity-10">
                         <span class="input-group-text border-0 bg-transparent" id="inputIcon"><i
                                 class="fa fa-user"></i></span>
-                        <input type="text" id="fullName" class="form-control shadow-none border-0 bg-transparent"
+                        <input type="text" id="userID" class="form-control shadow-none border-0 bg-transparent"
                             placeholder="Discord user ID" aria-describedby="inputIcon">
                         <div class="invalid-feedback bg-danger text-light text-center py-1 rounded-bottom">
                             Must be a valid Discord user ID.
@@ -91,40 +91,51 @@
             icon.classList.add('fa-eye');
         }
     }
-    const MembershipCheck = {
-        validateUserID() {
-            const fullName = document.getElementById('fullName').value;
-            return /^[a-zA-Z\s]+$/.test(fullName) && fullName.split(' ').length >= 2;
+    const User = {
+        userID_InputElement: document.getElementById('userID'),
+        password_InputElement: document.getElementById('password'),
+        retryPassword_InputElement: document.getElementById('retryPassword'),
+        loginButton: document.getElementById('loginButton'),
+        inputsContainer: document.getElementById('inputs'),
+
+        async validateUserID() {
+            const value = this.userID_InputElement.value;
+            const url = `./api/validate?userID=`;
+            return (await (await fetch(/^\d+$/.test(value) ? url + value : url + '@me')).json()).response;
         },
+
         validatePassword() {
-            return document.getElementById('password').value.length > 8;
+            return this.password_InputElement.value.length > 8;
         },
+
         validateRetryPassword() {
-            const password = document.getElementById('password').value;
-            const retryPassword = document.getElementById('retryPassword').value;
-            return retryPassword === password;
+            return this.retryPassword_InputElement.value === this.password_InputElement.value;
         },
-        validateInput() {
-            const inputsContainer = document.getElementById('inputs');
-            for (const inputContainer of inputsContainer.children) {
+
+        async validateInput() {
+            for (const inputContainer of this.inputsContainer.children) {
                 const input = inputContainer.querySelector('input');
                 input.addEventListener('input', () => input.classList.remove('is-invalid'));
             }
+
             // Validate each field and mark invalid ones
-            if (!this.validateFullname()) return this.markInvalid('fullName');
-            if (!this.validateGmail()) return this.markInvalid('gmail');
-            if (!this.validatePassword()) return this.markInvalid('password');
-            if (!this.validateRetryPassword()) return this.markInvalid('retryPassword');
-            inputsContainer.style.filter = 'brightness(75%)';
-            inputsContainer.style.pointerEvents = 'none';
-            document.getElementById('loginButton').toggleAttribute('disabled');
+            if (!await this.validateUserID()) return this.markInvalid(this.userID_InputElement.id);
+            if (!this.validatePassword()) return this.markInvalid(this.password_InputElement.id);
+            if (!this.validateRetryPassword()) return this.markInvalid(this.retryPassword_InputElement.id);
+
+            this.inputsContainer.style.filter = 'brightness(75%)';
+            this.inputsContainer.style.pointerEvents = 'none';
+
+            this.loginButton.toggleAttribute('disabled');
+            this.loginButton.innerHTML = '<i class="spinner-border" role="status"></i>';
         },
+
         markInvalid(id) {
             document.getElementById(id).classList.add('is-invalid');
         }
-    }
+    };
 
-    document.getElementById('loginButton').onclick = () => MembershipCheck.validateInput();
+    document.getElementById('loginButton').onclick = () => User.validateInput();
 </script>
 
 </html>

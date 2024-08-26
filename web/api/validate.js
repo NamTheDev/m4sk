@@ -8,5 +8,6 @@ const { rest } = require("../../src")
  */
 module.exports = async (req, res) => {
     const user = await rest.get(Routes.user(req.query.userID))
-    res.json({ response: user.username !== "M4sk" })
+    console.log(user)
+    res.json({ response: Boolean(user.username !== "M4sk") })
 }
