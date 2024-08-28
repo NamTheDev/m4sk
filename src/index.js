@@ -5,8 +5,9 @@ const { Client, GatewayIntentBits, Collection, Routes, InteractionType, EmbedBui
 const { readdirSync } = require("fs");
 const fetch = require("node-fetch");
 const { join } = require("path");
-const { defaultEmbedColor } = require('./config');
+const { defaultEmbedColor, economy } = require('./config');
 const { fetchUrbanDictionarySearch } = require('./utilities/fetchDataFunctions');
+const { claimAutofarmCredits } = require('./utilities/autofarm');
 
 const client = new Client({
     intents: Object.keys(GatewayIntentBits).map(intent => intent)
@@ -44,8 +45,6 @@ client.on('ready', async ({ rest }) => {
         console.error(error);
     }
 })
-
-const cooldown = new Map()
 
 client.on('interactionCreate', async (interaction) => {
     if (interaction.type === InteractionType.ApplicationCommand) {
@@ -112,6 +111,10 @@ client.on('interactionCreate', async (interaction) => {
             await interaction.update({ embeds: [embed], components: interaction.message.components })
         }
     }
+})
+
+client.on('messageCreate', async (message) => {
+    claimAutofarmCredits(message.author.id).then(messageContent => messageContent ? message.reply(messageContent) : null);
 })
 
 client.login(process.env.TOKEN)

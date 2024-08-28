@@ -1,6 +1,3 @@
-const { Routes } = require("discord.js")
-const { rest } = require("../../src")
-
 module.exports = {
     type: 'post',
     /**
@@ -8,6 +5,8 @@ module.exports = {
     * @param {import("express").Response} res
     */
     async execute(req, res) {
+        const { Routes } = require("discord.js")
+        const { rest } = require("../../src")
         console.log(req.body)
         res.send('Successfully logged in!')
     }
