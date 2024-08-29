@@ -7,25 +7,25 @@ const { spin } = require('../utilities/spin');
 module.exports = new SlashCommand({
     data: new SlashCommandBuilder()
         .setName('economy')
-        .setDescription('Manage your economy')
+        .setDescription('Manage your economy.')
         .addSubcommand(subcommand =>
             subcommand
                 .setName('credits')
-                .setDescription('Check your credits')
+                .setDescription('Check your credits.')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('work')
-                .setDescription('Work to earn credits (every 15 minutes)')
+                .setDescription('Work to earn credits (every 15 minutes).')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('spin')
-                .setDescription('Spin and get rare items')
+                .setDescription('Spin and get rare items.')
                 .addStringOption(option =>
                     option
                         .setName('amount')
-                        .setDescription('Specify the amount')
+                        .setDescription('Specify the amount.')
                         .setRequired(true)
                         .setAutocomplete(true)
                 )
@@ -33,28 +33,28 @@ module.exports = new SlashCommand({
         .addSubcommand(subcommand =>
             subcommand
                 .setName('shop')
-                .setDescription('Buy items from the shop')
+                .setDescription('Buy items from the shop.')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('inventory')
-                .setDescription('Check your inventory')
+                .setDescription('Check your inventory.')
         )
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
-                .setDescription('Buy a specific item')
+                .setDescription('Buy a specific item.')
                 .addStringOption(option =>
                     option
                         .setName('item')
-                        .setDescription('Select the item to buy')
+                        .setDescription('Select the item to buy.')
                         .setRequired(true)
                         .setAutocomplete(true)
                 )
                 .addNumberOption(option =>
                     option
                         .setName('amount')
-                        .setDescription('Amount of item to buy')
+                        .setDescription('Amount of item to buy.')
                         .setMinValue(1)
                         .setMaxValue(100)
                 )
@@ -62,18 +62,18 @@ module.exports = new SlashCommand({
         .addSubcommand(subcommand =>
             subcommand
                 .setName('use')
-                .setDescription('Use an item from your inventory')
+                .setDescription('Use an item from your inventory.')
                 .addStringOption(option =>
                     option
                         .setName('item')
-                        .setDescription('Select the item to use')
+                        .setDescription('Select the item to use.')
                         .setRequired(true)
                         .setAutocomplete(true)
                 )
                 .addStringOption(option =>
                     option
                         .setName('rarity')
-                        .setDescription('Apply rarity to a specific item for extra effects')
+                        .setDescription('Apply rarity to a specific item for extra effects.')
                         .setAutocomplete(true)
                 )
         ),
