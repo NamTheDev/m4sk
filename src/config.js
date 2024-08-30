@@ -2,8 +2,13 @@ const { Colors } = require("discord.js");
 const { textDatabase } = require("multi-purpose");
 
 module.exports = {
+    // Default color for embeds used in bot responses
     "defaultEmbedColor": Colors.DarkRed,
+
+    // Database for storing economy-related data
     "economy": new textDatabase('economy'),
+
+    // List of items available in the shop
     "shopItems": [
         {
             "name": "spins",
@@ -17,6 +22,8 @@ module.exports = {
             "usable": true
         }
     ],
+
+    // Available spin amounts for the spin command
     "spinAmounts": [
         "Use x1 spin",
         "Use x5 spin",
@@ -25,15 +32,19 @@ module.exports = {
         "Use x50 spin",
         "Use x100 spin"
     ],
+
+    // Cooldown times (in milliseconds) for various commands
     "cooldowns": {
-        "balance": 0,
-        "work": 900000,
-        "spin": 300000,
-        "shop": 0,
-        "inventory": 0,
-        "buy": 0,
-        "use": 0
+        "balance": 0,        // No cooldown for checking balance
+        "work": 900000,      // 15 minutes cooldown for work command
+        "spin": 300000,      // 5 minutes cooldown for spin command
+        "shop": 0,           // No cooldown for viewing shop
+        "inventory": 0,      // No cooldown for checking inventory
+        "buy": 0,            // No cooldown for buying items
+        "use": 0             // No cooldown for using items
     },
+
+    // Rarity tiers for rewards, including probabilities and prices
     "rarity": [
         { "tier": "C (common)", "baseProbability": 0.4, "price": 10 },
         { "tier": "B (uncommon)", "baseProbability": 0.25, "price": 20 },
