@@ -1,5 +1,4 @@
 require('dotenv').config(); // Load environment variables from .env file
-require('../web/index'); // Import any web-related dependencies or initializations
 
 // Import required Discord.js classes and modules
 const {
