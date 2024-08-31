@@ -1,19 +1,13 @@
-require('dotenv').config();
 const fetch = require('node-fetch');
-
-// MongoDB Data API configuration
-const MONGODB_DATA_API_URL = 'https://data.mongodb-api.com/app/data-tincyab/endpoint/data/v1/action';
-const API_KEY = process.env.MONGODB_API_KEY;
-const DATABASE = 'M4sk';
-const COLLECTION = 'Economy';
 
 // A class that wraps MongoDB Data API operations to simulate collection methods
 class MongoDatabaseCollection {
   constructor() {
-    this.url = MONGODB_DATA_API_URL;
-    this.apiKey = API_KEY;
-    this.database = DATABASE;
-    this.collection = COLLECTION;
+    // MongoDB Data API configuration
+    this.url = 'https://data.mongodb-api.com/app/data-tincyab/endpoint/data/v1/action';
+    this.apiKey = process.env.MONGODB_API_KEY;
+    this.database = 'M4sk';
+    this.collection = 'Economy';
   }
 
   // Helper method to send a request to the MongoDB Data API
