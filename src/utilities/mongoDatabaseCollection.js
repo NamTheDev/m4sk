@@ -24,6 +24,7 @@ class MongoDatabaseCollection {
       },
       body: JSON.stringify(bodyParams),
     });
+    console.log(response);
     return await response.json();
   }
 
