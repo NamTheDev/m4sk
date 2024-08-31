@@ -24,7 +24,6 @@ class MongoDatabaseCollection {
       },
       body: JSON.stringify(bodyParams),
     });
-    console.log(response);
     return await response.json();
   }
 
@@ -65,7 +64,7 @@ class MongoDatabaseCollection {
     database: this.database,
     collection: this.collection,
     filter: filter,
-  })
+  }) || { document: null };
 
   // Finds multiple documents in the collection
   // filter: The criteria to select the documents
@@ -74,7 +73,8 @@ class MongoDatabaseCollection {
     database: this.database,
     collection: this.collection,
     filter: filter,
-  })
+  }) || { documents: null };
+
 
   // Sets a key-value pair in the collection
   // If the key exists, it updates the value; otherwise, it inserts a new document
