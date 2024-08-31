@@ -8,6 +8,9 @@ class MongoDatabaseCollection {
     this.apiKey = process.env.MONGODB_API_KEY;
     this.database = 'M4sk';
     this.collection = 'Economy';
+    if(!this.apiKey) {
+      throw new Error('MONGODB_API_KEY is not set');
+    }
   }
 
   // Helper method to send a request to the MongoDB Data API
