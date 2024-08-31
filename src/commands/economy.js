@@ -130,12 +130,12 @@ module.exports = new SlashCommand({
 
 // Function to initialize user economy if not already present
 async function initializeUserEconomy(userId) {
-    if (!await economy.get(userId)) {
+    const result = await economy.get(userId)
+    if (!result) {
         const initialRarities = rarity.reduce((acc, { tier }) => {
             acc[tier] = 0;
             return acc;
         }, {});
-
         await economy.set(userId, {
             credits: 0,
             lastWork: 0,
