@@ -1,12 +1,12 @@
 const { Colors } = require("discord.js");
-const { textDatabase } = require("multi-purpose");
+const MongoDatabaseCollection = require("./utilities/mongoDatabaseCollection");
 
 module.exports = {
     // Default color for embeds used in bot responses
     "defaultEmbedColor": Colors.DarkRed,
 
     // Database for storing economy-related data
-    "economy": new textDatabase('economy'),
+    "economy": new MongoDatabaseCollection(),
 
     // List of items available in the shop
     "shopItems": [
