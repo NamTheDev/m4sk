@@ -90,6 +90,7 @@ class MongoDatabaseCollection {
   // Returns the value if found, null otherwise
   get = async (key) => {
     const result = await this.findOne({ key: key });
+    console.log(result);
     return result.document ? result.document.value : null;
   }
 
