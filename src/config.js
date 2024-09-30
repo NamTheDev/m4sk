@@ -54,5 +54,17 @@ module.exports = {
         { "tier": "S+ (mythical)", "baseProbability": 0.03, "price": 500 },
         { "tier": "S++ (relic)", "baseProbability": 0.015, "price": 1000 },
         { "tier": "S+++ (ultimate)", "baseProbability": 0.005, "price": 2000 }
+    ],
+
+    "availableTypes": [
+        "DIGIT-DIGIT",
+        "URI",
+        "MORSE",
+        "BINARY",
+        "BASE64",
+        "HEX",
+        "ROT13",
+        "CAESAR",
+        "ATBASH"
     ]
 }
